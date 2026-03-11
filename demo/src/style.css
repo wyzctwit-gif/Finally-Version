@@ -1,0 +1,1503 @@
+/* ========================================
+   校园代取系统 - Material Design 2 优化版
+   Design System: Campus Express MD2 V3.0
+   ======================================== */
+
+:root {
+  /* === 品牌色彩 - Material Design 优化 === */
+  --primary-50: #FFF5F0;
+  --primary-100: #FFE5D9;
+  --primary-200: #FFC9B3;
+  --primary-300: #FFA685;
+  --primary-400: #FF7F56;
+  --primary-500: #FF6B35;  /* 主色 - 活力橙 */
+  --primary-600: #F05414;
+  --primary-700: #D1400E;
+  --primary-800: #A83614;
+  --primary-900: #8A2F15;
+
+  /* === 中性色 - 增加对比度 === */
+  --slate-50: #FAFAFA;
+  --slate-100: #F5F5F5;
+  --slate-200: #EEEEEE;
+  --slate-300: #E0E0E0;
+  --slate-400: #BDBDBD;
+  --slate-500: #9E9E9E;
+  --slate-600: #757575;
+  --slate-700: #616161;
+  --slate-800: #424242;
+  --slate-900: #212121;
+
+  /* === 功能色 - Material 风格 === */
+  --success: #2BA85C;
+  --success-bg: #E8F5E9;
+  --success-light: #81C784;
+  --warning: #FFB300;
+  --warning-bg: #FFF8E1;
+  --warning-light: #FFD54F;
+  --danger: #E53935;
+  --danger-bg: #FFEBEE;
+  --danger-light: #EF5350;
+  --info: #1E88E5;
+  --info-bg: #E3F2FD;
+  --info-light: #64B5F6;
+
+  /* === Material 强调色 === */
+  --accent: #FF6B35;
+  --accent-light: #FF8A65;
+  --accent-dark: #F4511E;
+
+  /* === 渐变 - MD2 风格 === */
+  --gradient-primary: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+  --gradient-warm: linear-gradient(135deg, #FF6B35 0%, #F05414 50%, #D1400E 100%);
+  --gradient-subtle: linear-gradient(180deg, #FAFAFA 0%, #F5F5F5 100%);
+  --gradient-surface: linear-gradient(180deg, #FFFFFF 0%, #FAFAFA 100%);
+  --gradient-card: linear-gradient(145deg, #FFFFFF 0%, #F8F9FA 100%);
+
+  /* === Material Design 阴影系统 === */
+  /* MD2 阴影层级：0-24 elevation */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1), 0 4px 8px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 16px 32px rgba(0, 0, 0, 0.12), 0 8px 16px rgba(0, 0, 0, 0.06);
+  --shadow-2xl: 0 24px 48px rgba(0, 0, 0, 0.14), 0 12px 24px rgba(0, 0, 0, 0.08);
+
+  /* MD2 Elevation 系统 */
+  --elevation-1: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  --elevation-2: 0 3px 6px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.12);
+  --elevation-3: 0 10px 20px rgba(0,0,0,0.15), 0 3px 6px rgba(0,0,0,0.10);
+  --elevation-4: 0 15px 25px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.05);
+  --elevation-5: 0 20px 40px rgba(0,0,0,0.2);
+
+  /* 彩色阴影 - 用于主按钮 */
+  --shadow-primary: 0 4px 14px rgba(255, 107, 53, 0.4);
+  --shadow-primary-hover: 0 6px 20px rgba(255, 107, 53, 0.5);
+  --shadow-accent: 0 2px 8px rgba(255, 107, 53, 0.3);
+
+  /* === 圆角 - MD2 风格 (更圆润) === */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+
+  /* === 动效 - Material 曲线 === */
+  --ease-out: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 350ms;
+  --duration-slower: 500ms;
+
+  /* === 间距 - 8pt 网格系统 === */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* === 字体 - Material 推荐 === */
+  --font-sans: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+               'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-display: 'Roboto', var(--font-sans);
+  --font-mono: 'Roboto Mono', 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+
+  /* === 字体层级 - Material 排版 === */
+  --text-display: 57px;
+  --text-headline: 32px;
+  --text-title: 22px;
+  --text-body: 16px;
+  --text-caption: 12px;
+  --text-overline: 10px;
+
+  --line-height-display: 1.13;
+  --line-height-headline: 1.25;
+  --line-height-title: 1.27;
+  --line-height-body: 1.5;
+  --line-height-caption: 1.33;
+  --line-height-overline: 1.6;
+
+  /* === 容器 === */
+  --container-max: 640px;
+  --container-padding: 20px;
+
+  /* === Ripple 涟漪效果 === */
+  --ripple-duration: 0.4s;
+  --ripple-scale: 1;
+}
+
+/* ========================================
+   全局重置
+   ======================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--slate-700);
+  background: linear-gradient(180deg, var(--slate-100) 0%, var(--slate-50) 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ========================================
+   背景装饰
+   ======================================== */
+#app {
+  position: relative;
+  min-height: 100vh;
+}
+
+/* 顶部渐变光晕 */
+#app::before {
+  content: '';
+  position: fixed;
+  top: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120%;
+  height: 80%;
+  background: radial-gradient(ellipse at center, var(--primary-100) 0%, transparent 60%);
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 页面容器 */
+.app-container {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
+}
+
+/* ========================================
+   排版
+   ======================================== */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--slate-800);
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: 28px; margin-bottom: 8px; }
+h2 { font-size: 24px; margin-bottom: 8px; }
+h3 { font-size: 20px; margin-bottom: 6px; }
+
+p {
+  margin-bottom: 16px;
+}
+
+a {
+  color: var(--primary-600);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+a:hover {
+  color: var(--primary-700);
+}
+
+/* ========================================
+   按钮系统 - Material Design 2
+   ======================================== */
+.btn {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-out);
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.btn:focus {
+  outline: 2px solid var(--primary-400);
+  outline-offset: 2px;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* Ripple 涟漪效果容器 */
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::after {
+  width: 300px;
+  height: 300px;
+  opacity: 0;
+  transition: 0s;
+}
+
+/* 主按钮 - Elevated Button */
+.btn-primary {
+  background: var(--gradient-primary);
+  color: #FFFFFF;
+  box-shadow: var(--elevation-2);
+}
+
+.btn-primary:hover {
+  box-shadow: var(--elevation-3);
+  transform: translateY(-2px);
+}
+
+.btn-primary:active {
+  box-shadow: var(--elevation-1);
+  transform: translateY(0) scale(0.98);
+}
+
+/* 次要按钮 - Outlined Button */
+.btn-secondary {
+  background: transparent;
+  color: var(--primary-600);
+  border: 1px solid var(--primary-300);
+  box-shadow: none;
+}
+
+.btn-secondary:hover {
+  background: var(--primary-50);
+  border-color: var(--primary-500);
+  box-shadow: var(--elevation-1);
+}
+
+.btn-secondary:active {
+  background: var(--primary-100);
+}
+
+/* 幽灵按钮 - Text Button */
+.btn-ghost {
+  background: transparent;
+  color: var(--slate-600);
+  box-shadow: none;
+}
+
+.btn-ghost:hover {
+  background: var(--slate-100);
+  color: var(--slate-800);
+}
+
+/* 危险按钮 */
+.btn-danger {
+  background: var(--danger);
+  color: #FFFFFF;
+  box-shadow: var(--elevation-2);
+}
+
+.btn-danger:hover {
+  background: var(--danger-light);
+  box-shadow: var(--elevation-3);
+  transform: translateY(-2px);
+}
+
+/* 浮动操作按钮 FAB */
+.btn-fab {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-xl);
+  background: var(--gradient-primary);
+  color: #FFFFFF;
+  box-shadow: var(--elevation-3);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-fab:hover {
+  box-shadow: var(--elevation-4);
+  transform: translateY(-2px);
+}
+
+.btn-fab:active {
+  box-shadow: var(--elevation-2);
+  transform: translateY(0) scale(0.95);
+}
+
+.btn-fab svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* 按钮尺寸 */
+.btn-sm {
+  padding: var(--space-2) var(--space-3);
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+}
+
+.btn-lg {
+  padding: var(--space-4) var(--space-6);
+  font-size: 16px;
+  border-radius: var(--radius-lg);
+}
+
+/* 按钮禁用状态 */
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* ========================================
+   卡片组件 - Material Design 2
+   ======================================== */
+.card {
+  background: var(--gradient-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--elevation-1);
+  border: none;
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.card:hover {
+  box-shadow: var(--elevation-2);
+}
+
+.card-interactive {
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-interactive::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--primary-500);
+  opacity: 0;
+  transition: opacity var(--duration-normal);
+  pointer-events: none;
+}
+
+.card-interactive:hover::before {
+  opacity: 0.04;
+}
+
+.card-interactive:active {
+  box-shadow: var(--elevation-1);
+  transform: scale(0.985);
+}
+
+/* 提升卡片 - Elevated Card */
+.card-elevated {
+  box-shadow: var(--elevation-2);
+}
+
+.card-elevated:hover {
+  box-shadow: var(--elevation-3);
+  transform: translateY(-2px);
+}
+
+/* 轮廓卡片 - Outlined Card */
+.card-outlined {
+  background: #FFFFFF;
+  box-shadow: none;
+  border: 1px solid var(--slate-200);
+}
+
+.card-outlined:hover {
+  border-color: var(--slate-300);
+  box-shadow: var(--elevation-1);
+}
+
+/* 卡片头部 */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--slate-100);
+}
+
+.card-title {
+  font-size: var(--text-title);
+  font-weight: 500;
+  color: var(--slate-800);
+  line-height: var(--line-height-title);
+}
+
+.card-subtitle {
+  font-size: var(--text-body);
+  color: var(--slate-500);
+  margin-top: 4px;
+}
+
+/* 卡片内容 */
+.card-content {
+  margin-bottom: var(--space-4);
+}
+
+/* 卡片操作区 */
+.card-actions {
+  display: flex;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--slate-100);
+}
+
+/* ========================================
+   表单元素 - Material Design 2
+   ======================================== */
+.form-group {
+  margin-bottom: var(--space-6);
+  position: relative;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--slate-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-label .required {
+  color: var(--danger);
+  margin-left: 2px;
+}
+
+/* Material 风格输入框 - Filled 样式 */
+.form-input,
+.form-select,
+.form-textarea {
+  width: 100%;
+  padding: var(--space-4);
+  font-family: inherit;
+  font-size: 16px;
+  color: var(--slate-800);
+  background: var(--slate-100);
+  border: none;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-bottom: 2px solid var(--slate-300);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.form-input:hover,
+.form-select:hover,
+.form-textarea:hover {
+  background: var(--slate-200);
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  background: var(--slate-50);
+  border-bottom-color: var(--primary-500);
+  box-shadow: 0 1px 0 0 var(--primary-500);
+}
+
+/* 输入框错误状态 */
+.form-input.error,
+.form-textarea.error {
+  border-bottom-color: var(--danger);
+  box-shadow: 0 1px 0 0 var(--danger);
+}
+
+.form-input.error:focus,
+.form-textarea.error:focus {
+  border-bottom-color: var(--danger);
+  box-shadow: 0 1px 0 0 var(--danger);
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+  color: var(--slate-400);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* 输入框辅助线 - 底部动画线 */
+.form-input-wrapper {
+  position: relative;
+}
+
+.form-input-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--primary-500);
+  transform: translateX(-50%);
+  transition: width var(--duration-normal) var(--ease-out);
+}
+
+.form-input-wrapper:focus-within::after {
+  width: 100%;
+}
+
+/* 前缀/后缀输入框 */
+.input-with-addon {
+  display: flex;
+  align-items: stretch;
+  background: var(--slate-100);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  border-bottom: 2px solid var(--slate-300);
+  transition: all var(--duration-fast);
+}
+
+.input-with-addon:focus-within {
+  background: var(--slate-50);
+  border-bottom-color: var(--primary-500);
+  box-shadow: 0 1px 0 0 var(--primary-500);
+}
+
+.input-addon {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-4);
+  color: var(--slate-500);
+  font-size: 14px;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+}
+
+.input-with-addon .form-input {
+  border: none;
+  background: transparent;
+  flex: 1;
+}
+
+.input-with-addon .form-input:focus {
+  box-shadow: none;
+}
+
+.form-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  font-size: 12px;
+  color: var(--danger);
+}
+
+.form-helper {
+  margin-top: var(--space-2);
+  font-size: 12px;
+  color: var(--slate-500);
+}
+
+/* 选择器箭头 */
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23757575' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+  background-size: 18px;
+  padding-right: var(--space-10);
+}
+
+/* 复选框和单选 - MD2 风格 */
+.form-checkbox,
+.form-radio {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary-500);
+}
+
+.checkbox-group,
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.checkbox-item,
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 15px;
+  color: var(--slate-700);
+  cursor: pointer;
+}
+
+/* ========================================
+   标签/徽章 - Material Design 2
+   ======================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+/* 填充样式 - Filled */
+.badge-primary {
+  background: var(--primary-100);
+  color: var(--primary-700);
+}
+
+.badge-success {
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.badge-warning {
+  background: var(--warning-bg);
+  color: #8A6A0A;
+}
+
+.badge-danger {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.badge-info {
+  background: var(--info-bg);
+  color: var(--info);
+}
+
+.badge-slate {
+  background: var(--slate-100);
+  color: var(--slate-600);
+}
+
+/* 轮廓样式 - Outlined */
+.badge-outlined {
+  background: transparent;
+  border: 1px solid currentColor;
+}
+
+.badge-outlined.badge-primary {
+  color: var(--primary-600);
+  border-color: var(--primary-300);
+}
+
+.badge-outlined.badge-success {
+  color: var(--success);
+  border-color: var(--success-light);
+}
+
+.badge-outlined.badge-warning {
+  color: var(--warning);
+  border-color: var(--warning-light);
+}
+
+.badge-outlined.badge-danger {
+  color: var(--danger);
+  border-color: var(--danger-light);
+}
+
+/* 小尺寸徽章 */
+.badge-sm {
+  padding: 2px var(--space-2);
+  font-size: 11px;
+}
+
+/* 徽章带图标 */
+.badge-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-icon svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* 状态点 */
+.badge-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+}
+
+.badge-dot::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge-dot.primary { color: var(--primary-500); }
+.badge-dot.success { color: var(--success); }
+.badge-dot.warning { color: var(--warning); }
+.badge-dot.danger { color: var(--danger); }
+
+/* ========================================
+   动画 - Material Design 2
+   ======================================== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Material Design 特色动画 */
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes expandIn {
+  from {
+    opacity: 0;
+    transform: scaleX(0.8) scaleY(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1) scaleY(1);
+  }
+}
+
+@keyframes fabShow {
+  0% {
+    transform: scale(0) rotate(-45deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* 动画类 */
+.animate-fade-in {
+  animation: fadeIn var(--duration-normal) var(--ease-out);
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp var(--duration-normal) var(--ease-out);
+}
+
+.animate-fade-in-down {
+  animation: fadeInDown var(--duration-normal) var(--ease-out);
+}
+
+.animate-scale-in {
+  animation: scaleIn var(--duration-normal) var(--ease-out);
+}
+
+.animate-pulse {
+  animation: pulse 2s var(--ease-in-out) infinite;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-bounce {
+  animation: bounce 2s var(--ease-in-out) infinite;
+}
+
+/* Material 特色动画 */
+.animate-ripple {
+  animation: ripple var(--ripple-duration) var(--ease-out);
+}
+
+.animate-slide-in-right {
+  animation: slideInRight var(--duration-normal) var(--ease-out);
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft var(--duration-normal) var(--ease-out);
+}
+
+.animate-expand-in {
+  animation: expandIn var(--duration-slow) var(--ease-spring);
+}
+
+.animate-fab-show {
+  animation: fabShow var(--duration-slow) var(--ease-spring);
+}
+
+/* 交错动画延迟 */
+.stagger-1 { animation-delay: 50ms; }
+.stagger-2 { animation-delay: 100ms; }
+.stagger-3 { animation-delay: 150ms; }
+.stagger-4 { animation-delay: 200ms; }
+.stagger-5 { animation-delay: 250ms; }
+.stagger-6 { animation-delay: 300ms; }
+.stagger-7 { animation-delay: 350ms; }
+.stagger-8 { animation-delay: 400ms; }
+
+/* ========================================
+   加载状态
+   ======================================== */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  color: var(--slate-400);
+  font-size: 14px;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--slate-200);
+  border-top-color: var(--primary-500);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* ========================================
+   空状态
+   ======================================== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-16) var(--space-6);
+  text-align: center;
+}
+
+.empty-state-icon {
+  width: 80px;
+  height: 80px;
+  margin-bottom: var(--space-5);
+  color: var(--slate-300);
+}
+
+.empty-state-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--slate-600);
+  margin-bottom: var(--space-2);
+}
+
+.empty-state-desc {
+  font-size: 14px;
+  color: var(--slate-400);
+  max-width: 280px;
+}
+
+/* ========================================
+   警告框/提示框 - Material Design 2
+   ======================================== */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.alert-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: currentColor;
+}
+
+.alert-warning {
+  background: var(--warning-bg);
+  color: #8A6A0A;
+  border: none;
+}
+
+.alert-info {
+  background: var(--info-bg);
+  color: #1565C0;
+  border: none;
+}
+
+.alert-danger {
+  background: var(--danger-bg);
+  color: #C62828;
+  border: none;
+}
+
+.alert-success {
+  background: var(--success-bg);
+  color: var(--success);
+  border: none;
+}
+
+/* 带边框的警告框 */
+.alert-bordered {
+  border-left: 4px solid currentColor;
+}
+
+.alert-bordered.alert-warning {
+  border-left-color: var(--warning);
+}
+
+.alert-bordered.alert-info {
+  border-left-color: var(--info);
+}
+
+.alert-bordered.alert-danger {
+  border-left-color: var(--danger);
+}
+
+.alert-bordered.alert-success {
+  border-left-color: var(--success);
+}
+
+/* ========================================
+   Snackbar/Toast - Material Design
+   ======================================== */
+.snackbar {
+  position: fixed;
+  bottom: calc(80px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--slate-800);
+  color: #FFFFFF;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-4);
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 280px;
+  max-width: 560px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  opacity: 0;
+  transition: all var(--duration-normal) var(--ease-emphasized);
+  z-index: 2000;
+}
+
+.snackbar.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.snackbar-action {
+  color: var(--accent);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: background var(--duration-fast);
+}
+
+.snackbar-action:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Snackbar 变体 */
+.snackbar-success {
+  background: var(--success);
+}
+
+.snackbar-error {
+  background: var(--danger);
+}
+
+.snackbar-warning {
+  background: var(--warning);
+  color: #212121;
+}
+
+.snackbar-warning .snackbar-action {
+  color: #424242;
+}
+
+/* ========================================
+   模态框/弹窗
+   ======================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  z-index: 1000;
+  animation: fadeIn var(--duration-fast) var(--ease-out);
+}
+
+.modal-content {
+  background: #FFFFFF;
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-2xl);
+  animation: scaleIn var(--duration-normal) var(--ease-out);
+}
+
+.modal-header {
+  margin-bottom: var(--space-5);
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--slate-800);
+}
+
+.modal-body {
+  margin-bottom: var(--space-5);
+}
+
+.modal-footer {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+
+/* ========================================
+   底部导航 - Material Design 2
+   ======================================== */
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid var(--slate-200);
+  padding: var(--space-2) var(--space-2) calc(var(--space-2) + env(safe-area-inset-bottom));
+  z-index: 100;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.tab-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: var(--space-2);
+  color: var(--slate-500);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-out);
+  border-radius: var(--radius-lg);
+  position: relative;
+  min-height: 56px;
+}
+
+.tab-bar-item:hover {
+  color: var(--slate-700);
+  background: var(--slate-100);
+}
+
+.tab-bar-item.active {
+  color: var(--primary-600);
+}
+
+/* 涟漪效果 */
+.tab-bar-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--duration-fast);
+}
+
+.tab-bar-item:active::after {
+  opacity: 0.08;
+}
+
+.tab-bar-icon {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  transition: transform var(--duration-fast) var(--ease-spring);
+}
+
+.tab-bar-item.active .tab-bar-icon {
+  transform: scale(1.1);
+}
+
+.tab-bar-item svg {
+  width: 100%;
+  height: 100%;
+}
+
+.tab-bar-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: color var(--duration-fast);
+}
+
+.tab-bar-item.active .tab-bar-label {
+  font-weight: 600;
+}
+
+/* 徽章通知 */
+.tab-bar-badge {
+  position: absolute;
+  top: 4px;
+  right: 12px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 5px;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  background: var(--danger);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  z-index: 1;
+}
+
+.tab-bar-badge-dot {
+  min-width: 8px;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+}
+
+/* ========================================
+   工具类 - Material Design 2
+   ======================================== */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+.text-sm { font-size: 13px; }
+.text-xs { font-size: 12px; }
+.text-lg { font-size: 18px; }
+.text-xl { font-size: 24px; }
+
+.text-muted { color: var(--slate-500); }
+.text-primary { color: var(--primary-600); }
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+.text-warning { color: var(--warning); }
+.text-info { color: var(--info); }
+
+.font-normal { font-weight: 400; }
+.font-medium { font-weight: 500; }
+.font-semibold { font-weight: 600; }
+.font-bold { font-weight: 700; }
+
+.italic { font-style: italic; }
+.uppercase { text-transform: uppercase; letter-spacing: 0.05em; }
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-5 { margin-top: var(--space-5); }
+.mt-6 { margin-top: var(--space-6); }
+
+.mb-1 { margin-bottom: var(--space-1); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-5 { margin-bottom: var(--space-5); }
+.mb-6 { margin-bottom: var(--space-6); }
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-end { justify-content: flex-end; }
+.gap-1 { gap: var(--space-1); }
+.gap-2 { gap: var(--space-2); }
+.gap-3 { gap: var(--space-3); }
+.gap-4 { gap: var(--space-4); }
+
+/* 表面层级 */
+.surface-1 { box-shadow: var(--elevation-1); }
+.surface-2 { box-shadow: var(--elevation-2); }
+.surface-3 { box-shadow: var(--elevation-3); }
+.surface-4 { box-shadow: var(--elevation-4); }
+.surface-5 { box-shadow: var(--elevation-5); }
+
+/* ========================================
+   响应式
+   ======================================== */
+@media (max-width: 640px) {
+  :root {
+    --container-padding: 16px;
+  }
+
+  h1 { font-size: 24px; }
+  h2 { font-size: 20px; }
+  h3 { font-size: 18px; }
+}
+
+/* ========================================
+   暗黑模式 - Material Design 2
+   ======================================== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* 暗黑模式中性色 */
+    --slate-50: #121212;
+    --slate-100: #1E1E1E;
+    --slate-200: #2C2C2C;
+    --slate-300: #3D3D3D;
+    --slate-400: #5A5A5A;
+    --slate-500: #8A8A8A;
+    --slate-600: #B8B8B8;
+    --slate-700: #E0E0E0;
+    --slate-800: #F5F5F5;
+    --slate-900: #FFFFFF;
+
+    /* 暗黑模式表面 */
+    --gradient-surface: linear-gradient(180deg, #1E1E1E 0%, #121212 100%);
+    --gradient-card: linear-gradient(145deg, #1E1E1E 0%, #191919 100%);
+
+    /* 暗黑模式功能色 */
+    --success-bg: rgba(43, 168, 92, 0.15);
+    --warning-bg: rgba(255, 179, 0, 0.15);
+    --danger-bg: rgba(229, 57, 53, 0.15);
+    --info-bg: rgba(30, 136, 229, 0.15);
+    --primary-50: rgba(255, 107, 53, 0.15);
+  }
+
+  body {
+    background: linear-gradient(180deg, #121212 0%, #1E1E1E 100%);
+  }
+
+  .modal-overlay {
+    background: rgba(0, 0, 0, 0.7);
+  }
+
+  .modal-content {
+    background: #1E1E1E;
+  }
+
+  .tab-bar {
+    background: rgba(30, 30, 30, 0.95);
+    border-top-color: #2C2C2C;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .tab-bar-item:hover {
+    background: #2C2C2C;
+  }
+
+  /* 暗黑模式卡片 */
+  .card {
+    border-color: #2C2C2C;
+  }
+
+  .card:hover {
+    border-color: #3D3D3D;
+  }
+
+  /* 暗黑模式表单 */
+  .form-input,
+  .form-select,
+  .form-textarea {
+    background: #2C2C2C;
+    color: #E0E0E0;
+  }
+
+  .form-input:hover,
+  .form-select:hover,
+  .form-textarea:hover {
+    background: #3D3D3D;
+  }
+
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    background: #2C2C2C;
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: #5A5A5A;
+  }
+
+  /* 暗黑模式按钮 */
+  .btn-secondary {
+    background: transparent;
+    border-color: #3D3D3D;
+    color: #B8B8B8;
+  }
+
+  .btn-secondary:hover {
+    background: #2C2C2C;
+  }
+
+  /* 暗黑模式阴影调整 */
+  .shadow-xs, .shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* ========================================
+   打印样式
+   ======================================== */
+@media print {
+  body {
+    background: white;
+  }
+
+  .tab-bar,
+  .btn,
+  .modal-overlay {
+    display: none;
+  }
+}
