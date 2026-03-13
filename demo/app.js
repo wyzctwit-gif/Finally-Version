@@ -17,7 +17,9 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const ALLOWED_ORIGINS = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://campus-help.vercel.app'
+  'https://campus-help.vercel.app',
+  'https://campushelp.top',
+  'https://www.campushelp.top'
 ];
 
 const setCorsHeaders = (req, res, next) => {
