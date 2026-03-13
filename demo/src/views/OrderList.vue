@@ -203,10 +203,15 @@ const formatTime = (time) => {
 const formatTimeAgo = (time) => {
   if (!time) return '';
   const now = new Date();
-  const dateStr = time.endsWith('Z') ? time : time + 'Z';
+  // 处理时区：如果已包含 Z 或 +/- 偏移量则直接使用，否则添加 Z 假设是 UTC
+  let dateStr = time;
+  if (!time.endsWith('Z') && !time.includes('+') && !time.includes('-', 10)) {
+    dateStr = time + 'Z';
+  }
   const date = new Date(dateStr);
-  const diff = Math.floor((now - date) / 1000);
+  if (isNaN(date.getTime())) return '未知时间';
 
+  const diff = Math.floor((now - date) / 1000);
   if (diff < 60) return '刚刚';
   if (diff < 3600) return `${Math.floor(diff / 60)}分钟前`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}小时前`;
