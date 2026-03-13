@@ -64,7 +64,8 @@ export default async function handler(req, res) {
       
       return res.json({
         message: '接单成功',
-        order: updatedOrder
+        order: updatedOrder,
+        publisher_contact: updatedOrder.publisher_contact
       });
     } catch (error) {
       console.error(error);
