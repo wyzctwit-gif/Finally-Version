@@ -5,9 +5,10 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [vue()],
   build: {
-    outDir: 'dist',
+    outDir: 'public',
     assetsDir: 'assets',
-    sourcemap: false
+    sourcemap: false,
+    emptyOutDir: true
   },
   server: {
     proxy: {
