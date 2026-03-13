@@ -39,16 +39,22 @@ export default async function handler(req, res) {
         return res.status(404).json({ error: '订单不存在' });
       }
 
-      if (cancel_type === 'publisher' && order.publisher_id !== publisher_id) {
-        return res.status(403).json({ error: '无权取消此订单' });
-      }
-      
-      if (order.status === '已取消' || order.status === '已完成') {
-        return res.status(400).json({ error: '该订单无法取消' });
+      // 验证权限
+      if (cancel_type === 'publisher') {
+        if (order.publisher_id !== publisher_id) {
+          return res.status(403).json({ error: '无权取消此订单' });
+        }
+        if (order.status !== '待接单') {
+          return res.status(400).json({ error: '只能取消待接单状态的订单' });
+        }
+      } else if (cancel_type === 'acceptor') {
+        if (!order.acceptor_id || order.acceptor_id !== acceptor_id) {
+          return res.status(403).json({ error: '无权取消此订单' });
+        }
       }
 
-      if (cancel_type === 'publisher' && order.status !== '待接单') {
-        return res.status(400).json({ error: '只能取消待接单状态的订单' });
+      if (order.status === '已取消' || order.status === '已完成') {
+        return res.status(400).json({ error: '该订单无法取消' });
       }
 
       let updates = {};

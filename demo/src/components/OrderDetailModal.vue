@@ -386,13 +386,31 @@ const handleCancelPublish = async () => {
 };
 const handleCancelAccept = async () => {
   if (!confirm('确定要取消接单吗？')) return;
-  try { await orderApi.cancel(order.value.id, { cancel_type: 'acceptor' }); toast.success('已取消接单'); emit('refresh'); handleClose(); }
-  catch (error) { toast.error(error.response?.data?.error || '取消失败'); }
+  try {
+    await orderApi.cancel(order.value.id, {
+      cancel_type: 'acceptor',
+      acceptor_id: order.value.acceptor_id
+    });
+    toast.success('已取消接单');
+    emit('refresh');
+    handleClose();
+  } catch (error) {
+    toast.error(error.response?.data?.error || '取消失败');
+  }
 };
 const handleUpdateStatus = async (status) => {
   if (!confirm(status === '进行中' ? '确认已取件？' : '确认已送达？')) return;
-  try { await orderApi.updateStatus(order.value.id, { status }); toast.success('状态更新成功'); emit('refresh'); handleClose(); }
-  catch (error) { toast.error(error.response?.data?.error || '操作失败'); }
+  try {
+    await orderApi.updateStatus(order.value.id, {
+      status,
+      acceptor_id: order.value.acceptor_id
+    });
+    toast.success('状态更新成功');
+    emit('refresh');
+    handleClose();
+  } catch (error) {
+    toast.error(error.response?.data?.error || '操作失败');
+  }
 };
 
 const copyContact = () => {
