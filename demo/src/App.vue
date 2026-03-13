@@ -1,38 +1,35 @@
 <template>
   <div id="app">
+    <Toast ref="toastRef" />
     <div class="app-container">
       <div class="main-content">
-        <Home
-          v-show="activeTab === 'home'"
-          @open-publish="openPublishModal"
-          @switch-tab="switchTab"
-        />
-        <OrderList
-          v-show="activeTab === 'orders'"
-          ref="orderListRef"
-          @open-detail="openOrderDetail"
-        />
-        <MyOrders
-          v-show="activeTab === 'my'"
-          ref="myOrdersRef"
-          @open-detail="openMyOrderDetail"
-        />
+        <!-- 如果是发布页面，不显示 TabBar 且全屏显示 -->
+        <router-view v-if="isPublishPage"></router-view>
+        
+        <!-- 其他页面显示 TabBar -->
+        <template v-else>
+          <Home
+            v-show="activeTab === 'home'"
+            @switch-tab="switchTab"
+          />
+          <OrderList
+            v-show="activeTab === 'orders'"
+            ref="orderListRef"
+            @open-detail="openOrderDetail"
+          />
+          <MyOrders
+            v-show="activeTab === 'my'"
+            ref="myOrdersRef"
+            @open-detail="openMyOrderDetail"
+          />
+        </template>
       </div>
 
-      <TabBar :active-tab="activeTab" @change="handleTabChange" />
-
-      <!-- 发布弹窗 -->
-      <transition name="modal">
-        <div v-if="showPublishModal" class="modal-overlay" @click="closePublishModal">
-          <div class="modal-container" @click.stop>
-            <PublishModal
-              :visible="showPublishModal"
-              @close="closePublishModal"
-              @success="handlePublishSuccess"
-            />
-          </div>
-        </div>
-      </transition>
+      <TabBar 
+        v-if="!isPublishPage" 
+        :active-tab="activeTab" 
+        @change="handleTabChange" 
+      />
 
       <!-- 订单详情弹窗 -->
       <transition name="modal">
@@ -53,16 +50,20 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue';
+import { ref, computed, watch, provide } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import TabBar from './components/TabBar.vue';
 import Home from './views/Home.vue';
 import OrderList from './views/OrderList.vue';
 import MyOrders from './views/MyOrders.vue';
-import PublishModal from './components/PublishModal.vue';
 import OrderDetailModal from './components/OrderDetailModal.vue';
+import Toast from './components/Toast.vue';
 
+const route = useRoute();
+const router = useRouter();
+
+const toastRef = ref(null);
 const activeTab = ref('home');
-const showPublishModal = ref(false);
 const showDetailModal = ref(false);
 const selectedOrderId = ref(null);
 const detailMode = ref('accept');
@@ -70,28 +71,33 @@ const detailMode = ref('accept');
 const orderListRef = ref(null);
 const myOrdersRef = ref(null);
 
+const isPublishPage = computed(() => route.name === 'Publish');
+
+// 提供 Toast 方法给子组件
+provide('toast', {
+  show: (msg, type, duration) => toastRef.value?.show(msg, type, duration),
+  success: (msg) => toastRef.value?.show(msg, 'success'),
+  error: (msg) => toastRef.value?.show(msg, 'error'),
+  info: (msg) => toastRef.value?.show(msg, 'info')
+});
+
+// 监听路由变化更新 activeTab（如果需要支持路由导航到 Tab）
+watch(() => route.path, (path) => {
+  if (path === '/') activeTab.value = 'home';
+  else if (path === '/orders') activeTab.value = 'orders';
+  else if (path === '/my-orders') activeTab.value = 'my';
+});
+
 const handleTabChange = (tab) => {
   activeTab.value = tab;
+  // 可以在这里添加路由跳转逻辑，使 URL 与 Tab 同步
+  if (tab === 'home') router.push('/');
+  else if (tab === 'orders') router.push('/orders');
+  else if (tab === 'my') router.push('/my-orders');
 };
 
 const switchTab = (tab) => {
-  activeTab.value = tab;
-};
-
-const openPublishModal = () => {
-  showPublishModal.value = true;
-};
-
-const closePublishModal = () => {
-  showPublishModal.value = false;
-};
-
-const handlePublishSuccess = () => {
-  activeTab.value = 'orders';
-  showPublishModal.value = false;
-  if (orderListRef.value) {
-    orderListRef.value.loadOrders();
-  }
+  handleTabChange(tab);
 };
 
 const openOrderDetail = (orderId) => {
@@ -158,9 +164,9 @@ const refreshCurrentTab = () => {
   background: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(4px);
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  padding: 0;
+  padding: var(--space-4);
   z-index: 1000;
 }
 
@@ -168,8 +174,9 @@ const refreshCurrentTab = () => {
   width: 100%;
   max-width: 560px;
   max-height: 85vh;
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  border-radius: var(--radius-xl);
   animation: modalSlideUp var(--duration-normal) var(--ease-out);
+  overflow: hidden;
 }
 
 @keyframes modalSlideUp {

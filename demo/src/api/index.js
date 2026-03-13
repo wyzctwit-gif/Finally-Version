@@ -9,6 +9,30 @@ const api = axios.create({
   }
 });
 
+// 请求拦截器：参数验证和日志记录
+api.interceptors.request.use(
+  (config) => {
+    console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, config.params || config.data);
+    return config;
+  },
+  (error) => {
+    console.error('[API Request Error]', error);
+    return Promise.reject(error);
+  }
+);
+
+// 响应拦截器：统一错误处理
+api.interceptors.response.use(
+  (response) => {
+    console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, response.status);
+    return response;
+  },
+  (error) => {
+    console.error('[API Response Error]', error.config?.url, error.response?.status, error.message);
+    return Promise.reject(error);
+  }
+);
+
 // 订单相关API
 export const orderApi = {
   // 发布任务
@@ -17,17 +41,49 @@ export const orderApi = {
   // 获取待接订单列表
   getList: (params) => api.get('/orders', { params }),
 
-  // 获取订单详情
-  getDetail: (id) => api.get(`/orders/${id}`),
+  // 获取订单详情 - 确保 orderId 类型正确
+  getDetail: (id) => {
+    // 确保 id 为数字类型
+    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+
+    if (isNaN(numericId) || numericId <= 0) {
+      console.error('[orderApi.getDetail] 无效的订单ID:', id);
+      return Promise.reject(new Error('无效的订单ID'));
+    }
+
+    console.log('[orderApi.getDetail] 请求订单详情, id:', numericId, '原始:', id);
+    return api.get(`/orders/${numericId}`);
+  },
 
   // 接单
-  accept: (id, data) => api.post(`/orders/${id}/accept`, data),
+  accept: (id, data) => {
+    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+    if (isNaN(numericId) || numericId <= 0) {
+      console.error('[orderApi.accept] 无效的订单ID:', id);
+      return Promise.reject(new Error('无效的订单ID'));
+    }
+    return api.post(`/orders/${numericId}/accept`, data);
+  },
 
   // 更新订单状态
-  updateStatus: (id, data) => api.patch(`/orders/${id}/status`, data),
+  updateStatus: (id, data) => {
+    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+    if (isNaN(numericId) || numericId <= 0) {
+      console.error('[orderApi.updateStatus] 无效的订单ID:', id);
+      return Promise.reject(new Error('无效的订单ID'));
+    }
+    return api.patch(`/orders/${numericId}/status`, data);
+  },
 
   // 取消订单
-  cancel: (id, data) => api.post(`/orders/${id}/cancel`, data),
+  cancel: (id, data) => {
+    const numericId = typeof id === 'string' ? parseInt(id, 10) : id;
+    if (isNaN(numericId) || numericId <= 0) {
+      console.error('[orderApi.cancel] 无效的订单ID:', id);
+      return Promise.reject(new Error('无效的订单ID'));
+    }
+    return api.post(`/orders/${numericId}/cancel`, data);
+  },
 
   // 获取我的发布
   getMyPublished: (publisherId) => api.get('/orders/my/published', { params: { publisher_id: publisherId } }),

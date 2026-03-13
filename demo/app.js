@@ -109,16 +109,58 @@ app.post('/api/orders', async (req, res) => {
 // 获取订单详情
 app.get('/api/orders/:id', async (req, res) => {
   try {
+    const orderId = parseInt(req.params.id, 10);
+    console.log('[API] 获取订单详情, id:', orderId, '原始:', req.params.id);
+
+    if (isNaN(orderId) || orderId <= 0) {
+      console.error('[API] 无效的订单ID:', req.params.id);
+      return res.status(400).json({
+        error: '无效的订单ID',
+        code: 'INVALID_ORDER_ID'
+      });
+    }
+
     const { data, error } = await supabase
       .from('orders')
       .select('*')
-      .eq('id', req.params.id)
+      .eq('id', orderId)
       .single();
-    
-    if (error || !data) return res.status(404).json({ error: '订单不存在' });
+
+    console.log('[API] Supabase 查询结果 - data:', data ? '存在' : '不存在', 'error:', error);
+
+    if (error) {
+      console.error('[API] Supabase 查询错误:', error);
+      return res.status(500).json({
+        error: '数据库查询失败',
+        code: 'DATABASE_ERROR',
+        details: error.message
+      });
+    }
+
+    if (!data) {
+      console.error('[API] 订单不存在, id:', orderId);
+      return res.status(404).json({
+        error: '订单不存在',
+        code: 'ORDER_NOT_FOUND'
+      });
+    }
+
+    // 验证数据完整性
+    const requiredFields = ['id', 'task_type', 'pickup_location', 'delivery_location', 'status'];
+    const missingFields = requiredFields.filter(field => !data[field]);
+
+    if (missingFields.length > 0) {
+      console.warn('[API] 订单数据缺失字段:', missingFields, 'orderId:', orderId);
+    }
+
+    console.log('[API] 订单详情查询成功, id:', orderId);
     res.json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[API] 获取订单详情异常:', err);
+    res.status(500).json({
+      error: err.message || '服务器内部错误',
+      code: 'INTERNAL_ERROR'
+    });
   }
 });
 

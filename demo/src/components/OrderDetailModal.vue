@@ -17,7 +17,11 @@
         <span>加载中...</span>
       </div>
 
-      <div v-else-if="order" class="modal-body">
+      <div v-else-if="!order" class="loading-state">
+        <span>暂无订单数据</span>
+      </div>
+
+      <div v-else class="modal-body">
         <!-- 订单信息 -->
         <div class="order-info-card">
           <div class="info-header">
@@ -98,7 +102,13 @@
         <!-- 联系方式 -->
         <div v-if="showContactInfo" class="contact-card">
           <div class="contact-label">{{ contactLabel }}</div>
-          <div class="contact-value">{{ contactValue }}</div>
+          <div class="contact-value" @click="copyContact">
+            {{ contactValue }}
+            <svg class="copy-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+          </div>
         </div>
 
         <!-- 风险提示 -->
@@ -113,9 +123,14 @@
         <!-- 操作按钮 -->
         <div class="action-buttons">
           <!-- 待接单 - 接单按钮 -->
-          <button v-if="order.status === '待接单' && mode === 'accept'" @click="showAcceptForm = true" class="btn btn-primary btn-lg">
-            接单
-          </button>
+          <template v-if="order.status === '待接单' && mode === 'accept'">
+            <div v-if="isMyOrder" class="notice-text warning">
+              这是您发布的订单，不能自己接单
+            </div>
+            <button v-else @click="showAcceptForm = true" class="btn btn-primary btn-lg">
+              接单
+            </button>
+          </template>
 
           <!-- 我的发布 - 待接单 -->
           <button v-if="order.status === '待接单' && mode === 'published'" @click="handleCancelPublish" class="btn btn-danger btn-lg">
@@ -193,7 +208,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, inject, nextTick } from 'vue';
 import { orderApi } from '../api';
 
 const props = defineProps({
@@ -203,6 +218,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close', 'refresh']);
+const toast = inject('toast');
 
 const loading = ref(false);
 const order = ref(null);
@@ -211,6 +227,36 @@ const showSuccessTip = ref(false);
 const accepting = ref(false);
 const acceptor_contact = ref('');
 const publisherContact = ref('');
+
+// 数据验证函数：确保订单数据完整性
+const validateOrderData = (data) => {
+  if (!data || typeof data !== 'object') {
+    console.error('[validateOrderData] 无效的数据:', data);
+    return null;
+  }
+
+  const validatedData = {
+    id: data.id || 0,
+    task_type: data.task_type || '未知类型',
+    pickup_location: data.pickup_location || '未填写',
+    delivery_location: data.delivery_location || '未填写',
+    task_description: data.task_description || '无描述',
+    reward_amount: data.reward_amount || 0,
+    publisher_contact: data.publisher_contact || '未提供',
+    status: data.status || '未知状态',
+    publisher_id: data.publisher_id || '',
+    acceptor_contact: data.acceptor_contact || null,
+    acceptor_id: data.acceptor_id || null,
+    created_at: data.created_at || new Date().toISOString(),
+    expires_at: data.expires_at || new Date().toISOString(),
+    expected_time: data.expected_time || null,
+    notes: data.notes || null,
+    accepted_at: data.accepted_at || null
+  };
+
+  console.log('[validateOrderData] 验证后的数据:', validatedData);
+  return validatedData;
+};
 
 const showContactInfo = computed(() => {
   if (!order.value) return false;
@@ -232,26 +278,86 @@ const contactValue = computed(() => {
   return '';
 });
 
+const isMyOrder = computed(() => {
+  if (!order.value || !order.value.publisher_id) return false;
+  const publisherIds = JSON.parse(localStorage.getItem('publisher_ids') || '[]');
+  return publisherIds.includes(order.value.publisher_id);
+});
+
 const loadOrder = async () => {
-  if (!props.orderId) return;
+  console.log('[loadOrder] 开始加载订单, orderId:', props.orderId, 'type:', typeof props.orderId);
+  if (!props.orderId) {
+    console.log('[loadOrder] 无效的 orderId, 返回');
+    return;
+  }
   loading.value = true;
   try {
+    console.log('[loadOrder] 调用 API, orderId:', props.orderId);
     const response = await orderApi.getDetail(props.orderId);
-    order.value = response.data;
+    console.log('[loadOrder] API 响应:', response);
+    console.log('[loadOrder] API response.data:', response.data);
+
+    if (response.data) {
+      // 应用数据验证
+      const validatedData = validateOrderData(response.data);
+      if (validatedData) {
+        order.value = validatedData;
+        // 等待 DOM 更新
+        await nextTick();
+        console.log('[loadOrder] 订单加载成功, DOM 已更新:', order.value);
+      } else {
+        console.error('[loadOrder] 数据验证失败');
+        toast.error('订单数据格式错误');
+        handleClose();
+      }
+    } else {
+      console.error('[loadOrder] 响应中无数据');
+      toast.error('订单数据为空');
+      handleClose();
+    }
   } catch (error) {
-    console.error('加载订单失败:', error);
-    alert('加载订单失败');
+    console.error('[loadOrder] 加载订单失败:', error);
+    console.error('[loadOrder] 错误响应:', error.response);
+
+    // 区分不同类型的错误
+    if (error.response) {
+      const status = error.response.status;
+      const errorMsg = error.response.data?.error || '加载订单失败';
+
+      if (status === 404) {
+        toast.error('订单不存在或已被删除');
+      } else if (status === 400) {
+        toast.error('请求参数错误');
+      } else if (status >= 500) {
+        toast.error('服务器错误，请稍后重试');
+      } else {
+        toast.error(errorMsg);
+      }
+    } else if (error.request) {
+      toast.error('网络连接失败，请检查网络');
+    } else {
+      toast.error('加载订单失败');
+    }
+
     handleClose();
   } finally {
     loading.value = false;
   }
 };
 
-watch(() => props.visible, (newVal) => { if (newVal && props.orderId) loadOrder(); });
-watch(() => props.orderId, (newVal) => { if (newVal && props.visible) loadOrder(); });
+// 优化 watch 监听器，添加 immediate 选项
+watch(() => props.visible, (newVal) => {
+  console.log('[watch] visible changed:', newVal, 'orderId:', props.orderId);
+  if (newVal && props.orderId) loadOrder();
+}, { immediate: true });
+
+watch(() => props.orderId, (newVal) => {
+  console.log('[watch] orderId changed:', newVal, 'visible:', props.visible);
+  if (newVal && props.visible) loadOrder();
+}, { immediate: true });
 
 const handleAccept = async () => {
-  if (!acceptor_contact.value) { alert('请填写联系方式'); return; }
+  if (!acceptor_contact.value) { toast.error('请填写联系方式'); return; }
   accepting.value = true;
   try {
     const response = await orderApi.accept(order.value.id, { acceptor_contact: acceptor_contact.value });
@@ -266,7 +372,7 @@ const handleAccept = async () => {
     showAcceptForm.value = false;
     showSuccessTip.value = true;
   } catch (error) {
-    alert(error.response?.data?.error || '接单失败');
+    toast.error(error.response?.data?.error || '接单失败');
   } finally {
     accepting.value = false;
   }
@@ -275,18 +381,27 @@ const handleAccept = async () => {
 const closeSuccessTip = () => { showSuccessTip.value = false; emit('refresh'); handleClose(); };
 const handleCancelPublish = async () => {
   if (!confirm('确定要取消该订单吗？')) return;
-  try { await orderApi.cancel(order.value.id, { cancel_type: 'publisher' }); alert('订单已取消'); emit('refresh'); handleClose(); }
-  catch (error) { alert(error.response?.data?.error || '取消失败'); }
+  try { await orderApi.cancel(order.value.id, { cancel_type: 'publisher' }); toast.success('订单已取消'); emit('refresh'); handleClose(); }
+  catch (error) { toast.error(error.response?.data?.error || '取消失败'); }
 };
 const handleCancelAccept = async () => {
   if (!confirm('确定要取消接单吗？')) return;
-  try { await orderApi.cancel(order.value.id, { cancel_type: 'acceptor' }); alert('已取消接单'); emit('refresh'); handleClose(); }
-  catch (error) { alert(error.response?.data?.error || '取消失败'); }
+  try { await orderApi.cancel(order.value.id, { cancel_type: 'acceptor' }); toast.success('已取消接单'); emit('refresh'); handleClose(); }
+  catch (error) { toast.error(error.response?.data?.error || '取消失败'); }
 };
 const handleUpdateStatus = async (status) => {
   if (!confirm(status === '进行中' ? '确认已取件？' : '确认已送达？')) return;
-  try { await orderApi.updateStatus(order.value.id, { status }); alert('状态更新成功'); emit('refresh'); handleClose(); }
-  catch (error) { alert(error.response?.data?.error || '操作失败'); }
+  try { await orderApi.updateStatus(order.value.id, { status }); toast.success('状态更新成功'); emit('refresh'); handleClose(); }
+  catch (error) { toast.error(error.response?.data?.error || '操作失败'); }
+};
+
+const copyContact = () => {
+  if (!contactValue.value) return;
+  navigator.clipboard.writeText(contactValue.value).then(() => {
+    toast.success('复制成功');
+  }).catch(() => {
+    toast.error('复制失败');
+  });
 };
 
 const formatTime = (time) => {
@@ -482,7 +597,31 @@ const handleClose = () => { showAcceptForm.value = false; acceptor_contact.value
   border: 1px solid var(--slate-100);
 }
 .contact-label { font-size: 13px; color: var(--slate-500); margin-bottom: var(--space-1); }
-.contact-value { font-size: 20px; font-weight: 700; color: var(--slate-800); }
+.contact-value { 
+  font-size: 20px; 
+  font-weight: 700; 
+  color: var(--slate-800); 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: color var(--duration-fast);
+}
+
+.contact-value:hover {
+  color: var(--primary-600);
+}
+
+.copy-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.5;
+}
+
+.contact-value:hover .copy-icon {
+  opacity: 1;
+}
 
 /* 警告框 */
 .alert {
@@ -597,6 +736,12 @@ const handleClose = () => { showAcceptForm.value = false; acceptor_contact.value
   text-align: center;
   color: #1E40AF;
   font-size: 14px;
+}
+
+.notice-text.warning {
+  background: #FEF3C7;
+  border-color: #FCD34D;
+  color: #92400E;
 }
 
 .status-text {
