@@ -1,73 +1,75 @@
-import { getSupabase } from '../../_lib/supabase.js';
-import { setCorsHeaders, handleOptions, handleError } from '../../_lib/middleware.js';
+import { createClient } from '@supabase/supabase-js';
 
-/**
- * 订单状态更新接口
- * PATCH /api/orders/:id/status
- */
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const setCorsHeaders = (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,x-admin-key');
+};
+
+const handleOptions = (req, res) => {
+  if (req.method === 'OPTIONS') {
+    setCorsHeaders(req, res);
+    res.status(200).end();
+    return true;
+  }
+  return false;
+};
+
 export default async function handler(req, res) {
-  // 设置 CORS 头
   setCorsHeaders(req, res);
-
-  // 处理预检请求
   if (handleOptions(req, res)) return;
 
-  const supabase = getSupabase();
+  const { id } = req.query;
 
-  // 检查 Supabase 配置
-  if (!supabase) {
-    return res.status(503).json({
-      error: '服务未配置',
-      message: '请先配置 Supabase 环境变量'
-    });
+  if (req.method === 'PATCH') {
+    try {
+      const { status, acceptor_id } = req.body;
+      
+      if (!['进行中', '已完成'].includes(status)) {
+        return res.status(400).json({ error: '无效的状态' });
+      }
+
+      const { data: order, error: fetchError } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (fetchError || !order) {
+        return res.status(404).json({ error: '订单不存在' });
+      }
+      
+      if (order.acceptor_id && order.acceptor_id !== acceptor_id) {
+        return res.status(403).json({ error: '无权操作此订单' });
+      }
+
+      const updates = { status };
+      if (status === '已完成') {
+        updates.completed_at = new Date().toISOString();
+      }
+
+      const { data: updatedOrder, error: updateError } = await supabase
+        .from('orders')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
+      return res.json({
+        message: '状态更新成功',
+        order: updatedOrder
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message || '状态更新失败' });
+    }
   }
 
-  // 只支持 PATCH 方法
-  if (req.method !== 'PATCH') {
-    return res.status(405).json({ error: '不支持的请求方法' });
-  }
-
-  try {
-    const { id } = req.query;
-    const { status } = req.body;
-
-    // 获取当前订单状态
-    const { data: order, error: fetchError } = await supabase
-      .from('orders')
-      .select('status')
-      .eq('id', id)
-      .single();
-
-    if (fetchError) throw fetchError;
-
-    // 验证状态流转
-    if (status === '进行中' && order.status !== '已接单') {
-      return res.status(400).json({ error: '当前状态无法标记为已取件' });
-    }
-
-    if (status === '已完成' && order.status !== '进行中') {
-      return res.status(400).json({ error: '当前状态无法标记为已送达' });
-    }
-
-    // 更新状态
-    const updateData = { status };
-    if (status === '已完成') {
-      updateData.completed_at = new Date().toISOString();
-    }
-
-    const { data, error } = await supabase
-      .from('orders')
-      .update(updateData)
-      .eq('id', id)
-      .select();
-
-    if (error) throw error;
-
-    return res.json({
-      message: '状态更新成功',
-      order: data[0]
-    });
-  } catch (error) {
-    return handleError(res, error, '操作失败，请稍后重试');
-  }
+  return res.status(405).json({ error: '不支持的请求方法' });
 }

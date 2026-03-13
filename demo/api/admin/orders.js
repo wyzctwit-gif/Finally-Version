@@ -1,60 +1,50 @@
-import { getSupabase } from '../_lib/supabase.js';
-import { setCorsHeaders, handleOptions, handleError, adminAuth } from '../_lib/middleware.js';
+import { createClient } from '@supabase/supabase-js';
 
-/**
- * 管理员获取所有订单
- * GET /api/admin/orders
- */
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY;
+
+const setCorsHeaders = (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,x-admin-key');
+};
+
+const handleOptions = (req, res) => {
+  if (req.method === 'OPTIONS') {
+    setCorsHeaders(req, res);
+    res.status(200).end();
+    return true;
+  }
+  return false;
+};
+
 export default async function handler(req, res) {
-  // 设置 CORS 头
   setCorsHeaders(req, res);
-
-  // 处理预检请求
   if (handleOptions(req, res)) return;
 
-  // 管理员认证
-  if (!adminAuth(req, res)) return;
-
-  const supabase = getSupabase();
-
-  // 检查 Supabase 配置
-  if (!supabase) {
-    return res.status(503).json({
-      error: '服务未配置',
-      message: '请先配置 Supabase 环境变量'
-    });
+  if (!ADMIN_SECRET_KEY) {
+    console.error('ADMIN_SECRET_KEY 未配置');
+    return res.status(503).json({ error: '服务器配置错误: 管理员接口未启用' });
   }
 
-  // 只支持 GET 方法
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: '不支持的请求方法' });
+  const adminKey = req.headers['x-admin-key'];
+  if (!adminKey || adminKey !== ADMIN_SECRET_KEY) {
+    return res.status(401).json({ error: '无效的管理员密钥' });
   }
 
-  try {
-    const { status, page = 1, limit = 20 } = req.query;
-    const offset = (page - 1) * limit;
-
-    let query = supabase
-      .from('orders')
-      .select('*', { count: 'exact' })
-      .order('created_at', { ascending: false })
-      .range(offset, offset + parseInt(limit) - 1);
-
-    if (status) {
-      query = query.eq('status', status);
+  if (req.method === 'GET') {
+    try {
+      const { data, error } = await supabase.from('orders').select('*');
+      if (error) throw error;
+      return res.json(data);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
     }
-
-    const { data, error, count } = await query;
-
-    if (error) throw error;
-
-    return res.json({
-      orders: data,
-      total: count,
-      page: parseInt(page),
-      limit: parseInt(limit)
-    });
-  } catch (error) {
-    return handleError(res, error, '获取订单列表失败');
   }
+
+  return res.status(405).json({ error: '不支持的请求方法' });
 }

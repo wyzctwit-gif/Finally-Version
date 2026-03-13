@@ -3,7 +3,18 @@
     "allow": [
       "Bash(npm start:*)",
       "WebFetch(domain:github.com)",
-      "Bash(git clone:*)"
+      "Bash(git clone:*)",
+      "Bash(npx vercel:*)",
+      "Bash(vercel list:*)",
+      "Bash(vercel inspect:*)",
+      "Bash(vercel domains:*)",
+      "Bash(vercel logs:*)",
+      "Bash(curl:*)",
+      "Bash(vercel project:*)",
+      "Bash(vercel:*)",
+      "Bash(npm run:*)",
+      "Bash(npm install:*)",
+      "Bash(rm:*)"
     ]
   }
 }

@@ -1,54 +1,47 @@
-import { getSupabase } from '../_lib/supabase.js';
-import { setCorsHeaders, handleOptions, handleError } from '../_lib/middleware.js';
+import { createClient } from '@supabase/supabase-js';
 
-/**
- * 订单详情接口
- * GET /api/orders/:id - 获取订单详情
- */
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const setCorsHeaders = (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,x-admin-key');
+};
+
+const handleOptions = (req, res) => {
+  if (req.method === 'OPTIONS') {
+    setCorsHeaders(req, res);
+    res.status(200).end();
+    return true;
+  }
+  return false;
+};
+
 export default async function handler(req, res) {
-  // 设置 CORS 头
   setCorsHeaders(req, res);
-
-  // 处理预检请求
   if (handleOptions(req, res)) return;
 
-  const supabase = getSupabase();
+  const { id } = req.query;
 
-  // 检查 Supabase 配置
-  if (!supabase) {
-    return res.status(503).json({
-      error: '服务未配置',
-      message: '请先配置 Supabase 环境变量'
-    });
-  }
+  if (req.method === 'GET') {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-  // 只支持 GET 方法
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: '不支持的请求方法' });
-  }
+      if (error) throw error;
+      if (!data) return res.status(404).json({ error: '订单不存在' });
 
-  try {
-    const { id } = req.query;
-
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) throw error;
-
-    if (!data) {
-      return res.status(404).json({ error: '订单不存在' });
+      return res.json(data);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: '获取订单详情失败' });
     }
-
-    // 如果订单已被接单，隐藏发布者联系方式（除非是接单者）
-    if (data.status !== '待接单') {
-      data.publisher_contact = '***';
-    }
-
-    return res.json(data);
-  } catch (error) {
-    return handleError(res, error, '获取订单详情失败');
   }
+
+  return res.status(405).json({ error: '不支持的请求方法' });
 }

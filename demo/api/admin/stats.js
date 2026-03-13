@@ -1,67 +1,60 @@
-import { getSupabase } from '../_lib/supabase.js';
-import { setCorsHeaders, handleOptions, handleError, adminAuth } from '../_lib/middleware.js';
+import { createClient } from '@supabase/supabase-js';
 
-/**
- * 获取统计数据
- * GET /api/admin/stats
- */
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY;
+
+const setCorsHeaders = (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,x-admin-key');
+};
+
+const handleOptions = (req, res) => {
+  if (req.method === 'OPTIONS') {
+    setCorsHeaders(req, res);
+    res.status(200).end();
+    return true;
+  }
+  return false;
+};
+
 export default async function handler(req, res) {
-  // 设置 CORS 头
   setCorsHeaders(req, res);
-
-  // 处理预检请求
   if (handleOptions(req, res)) return;
 
-  // 管理员认证
-  if (!adminAuth(req, res)) return;
-
-  const supabase = getSupabase();
-
-  // 检查 Supabase 配置
-  if (!supabase) {
-    return res.status(503).json({
-      error: '服务未配置',
-      message: '请先配置 Supabase 环境变量'
-    });
+  if (!ADMIN_SECRET_KEY) {
+    console.error('ADMIN_SECRET_KEY 未配置');
+    return res.status(503).json({ error: '服务器配置错误: 管理员接口未启用' });
   }
 
-  // 只支持 GET 方法
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: '不支持的请求方法' });
+  const adminKey = req.headers['x-admin-key'];
+  if (!adminKey || adminKey !== ADMIN_SECRET_KEY) {
+    return res.status(401).json({ error: '无效的管理员密钥' });
   }
 
-  try {
-    // 获取各状态订单数量
-    const { data: statusData, error: statusError } = await supabase
-      .from('orders')
-      .select('status');
+  if (req.method === 'GET') {
+    try {
+      const { data: allOrders, error } = await supabase.from('orders').select('status');
+      if (error) throw error;
 
-    if (statusError) throw statusError;
+      const stats = {
+        total: allOrders.length,
+        pending: allOrders.filter(o => o.status === '待接单').length,
+        accepted: allOrders.filter(o => o.status === '已接单').length,
+        inProgress: allOrders.filter(o => o.status === '进行中').length,
+        completed: allOrders.filter(o => o.status === '已完成').length,
+        cancelled: allOrders.filter(o => o.status === '已取消').length
+      };
 
-    const stats = {
-      total: statusData.length,
-      pending: statusData.filter(o => o.status === '待接单').length,
-      accepted: statusData.filter(o => o.status === '已接单').length,
-      inProgress: statusData.filter(o => o.status === '进行中').length,
-      completed: statusData.filter(o => o.status === '已完成').length,
-      cancelled: statusData.filter(o => o.status === '已取消').length
-    };
-
-    // 获取今日订单数
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const { data: todayData, error: todayError } = await supabase
-      .from('orders')
-      .select('id')
-      .gte('created_at', today.toISOString());
-
-    if (todayError) throw todayError;
-
-    stats.today = todayData.length;
-
-    return res.json(stats);
-  } catch (error) {
-    return handleError(res, error, '获取统计数据失败');
+      return res.json(stats);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
+    }
   }
+
+  return res.status(405).json({ error: '不支持的请求方法' });
 }

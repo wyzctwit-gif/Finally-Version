@@ -1,49 +1,45 @@
-import { getSupabase } from '../../_lib/supabase.js';
-import { setCorsHeaders, handleOptions, handleError } from '../../_lib/middleware.js';
+import { createClient } from '@supabase/supabase-js';
 
-/**
- * 获取我的发布订单
- * GET /api/orders/my/published
- */
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const setCorsHeaders = (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,x-admin-key');
+};
+
+const handleOptions = (req, res) => {
+  if (req.method === 'OPTIONS') {
+    setCorsHeaders(req, res);
+    res.status(200).end();
+    return true;
+  }
+  return false;
+};
+
 export default async function handler(req, res) {
-  // 设置 CORS 头
   setCorsHeaders(req, res);
-
-  // 处理预检请求
   if (handleOptions(req, res)) return;
 
-  const supabase = getSupabase();
+  const { publisher_id } = req.query;
 
-  // 检查 Supabase 配置
-  if (!supabase) {
-    return res.status(503).json({
-      error: '服务未配置',
-      message: '请先配置 Supabase 环境变量'
-    });
-  }
-
-  // 只支持 GET 方法
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: '不支持的请求方法' });
-  }
-
-  try {
-    const { publisher_id } = req.query;
-
-    if (!publisher_id) {
-      return res.status(400).json({ error: '缺少发布者ID' });
+  if (req.method === 'GET') {
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('publisher_id', publisher_id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return res.json(data || []);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: '获取我的发布失败' });
     }
-
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('publisher_id', publisher_id)
-      .order('created_at', { ascending: false });
-
-    if (error) throw error;
-
-    return res.json(data || []);
-  } catch (error) {
-    return handleError(res, error, '获取订单失败');
   }
+
+  return res.status(405).json({ error: '不支持的请求方法' });
 }

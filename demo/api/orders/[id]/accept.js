@@ -1,83 +1,76 @@
-import { getSupabase } from '../../_lib/supabase.js';
-import { setCorsHeaders, handleOptions, handleError } from '../../_lib/middleware.js';
+import { createClient } from '@supabase/supabase-js';
 
-/**
- * 接单接口
- * POST /api/orders/:id/accept
- */
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+const setCorsHeaders = (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,x-admin-key');
+};
+
+const handleOptions = (req, res) => {
+  if (req.method === 'OPTIONS') {
+    setCorsHeaders(req, res);
+    res.status(200).end();
+    return true;
+  }
+  return false;
+};
+
 export default async function handler(req, res) {
-  // 设置 CORS 头
   setCorsHeaders(req, res);
-
-  // 处理预检请求
   if (handleOptions(req, res)) return;
 
-  const supabase = getSupabase();
+  const { id } = req.query;
 
-  // 检查 Supabase 配置
-  if (!supabase) {
-    return res.status(503).json({
-      error: '服务未配置',
-      message: '请先配置 Supabase 环境变量'
-    });
-  }
+  if (req.method === 'POST') {
+    try {
+      const { acceptor_contact } = req.body;
+      if (!acceptor_contact) {
+        return res.status(400).json({ error: '请填写联系方式' });
+      }
 
-  // 只支持 POST 方法
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: '不支持的请求方法' });
-  }
+      const { data: order, error: fetchError } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (fetchError || !order) {
+        return res.status(404).json({ error: '订单不存在' });
+      }
+      if (order.status !== '待接单') {
+        return res.status(400).json({ error: '该订单已被接取或已取消' });
+      }
 
-  try {
-    const { id } = req.query;
-    const { acceptor_contact } = req.body;
-
-    if (!acceptor_contact) {
-      return res.status(400).json({ error: '请填写联系方式' });
-    }
-
-    // 检查订单状态
-    const { data: order, error: fetchError } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (fetchError) throw fetchError;
-
-    if (!order) {
-      return res.status(404).json({ error: '订单不存在' });
-    }
-
-    if (order.status !== '待接单') {
-      return res.status(400).json({ error: '该订单已被接取' });
-    }
-
-    // 生成接单者ID
-    const acceptor_id = 'acc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-
-    // 更新订单状态（并发控制）
-    const { data, error } = await supabase
-      .from('orders')
-      .update({
+      const acceptor_id = 'acc_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      const updates = {
         status: '已接单',
         acceptor_contact,
         acceptor_id,
         accepted_at: new Date().toISOString()
-      })
-      .eq('id', id)
-      .eq('status', '待接单')
-      .select();
+      };
 
-    if (error || data.length === 0) {
-      return res.status(400).json({ error: '该订单已被接取' });
+      const { data: updatedOrder, error: updateError } = await supabase
+        .from('orders')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+      
+      return res.json({
+        message: '接单成功',
+        order: updatedOrder
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message || '接单失败' });
     }
-
-    return res.json({
-      message: '接单成功',
-      order: data[0],
-      publisher_contact: order.publisher_contact
-    });
-  } catch (error) {
-    return handleError(res, error, '接单失败，请稍后重试');
   }
+
+  return res.status(405).json({ error: '不支持的请求方法' });
 }

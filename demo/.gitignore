@@ -1,4 +1,30 @@
 node_modules/
 .DS_Store
 dist/
+
+# 环境变量文件 - 绝不能提交！
 .env
+.env.local
+.env.*.local
+.env.development
+.env.production
+server/.env
+
+# IDE 和编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 日志文件
+*.log
+npm-debug.log*
+
+# 操作系统文件
+Thumbs.db
+
+# 敏感配置
+*.pem
+*.key
+credentials.json
+.vercel
